@@ -221,6 +221,11 @@ func (queue *redisQueue) SetPushQueue(pushQueue Queue) {
 // must be called before consumers can be added!
 // pollDuration is the duration the queue sleeps before checking for new deliveries
 func (queue *redisQueue) StartConsuming(prefetchLimit int, pollDuration time.Duration) bool {
+	fetcher := &ReliableFifoFetcher{}
+	return queue.StartConsumingWithFetcher(fetcher, prefetchLimit, pollDuration)
+}
+
+func (queue *redisQueue) StartConsumingWithFetcher(fetcher Fetcher, prefetchLimit int, pollDuration time.Duration) bool {
 	if queue.deliveryChan != nil {
 		return false // already consuming
 	}
@@ -234,7 +239,7 @@ func (queue *redisQueue) StartConsuming(prefetchLimit int, pollDuration time.Dur
 	queue.pollDuration = pollDuration
 	queue.deliveryChan = make(chan Delivery, prefetchLimit)
 	// log.Printf("rmq queue started consuming %s %d %s", queue, prefetchLimit, pollDuration)
-	go queue.consume()
+	go queue.consume(fetcher)
 	return true
 }
 
@@ -306,10 +311,10 @@ func (queue *redisQueue) RemoveAllConsumers() int {
 	return int(result.Val())
 }
 
-func (queue *redisQueue) consume() {
+func (queue *redisQueue) consume(fetcher Fetcher) {
 	for {
 		batchSize := queue.batchSize()
-		wantMore := queue.consumeBatch(batchSize)
+		wantMore := queue.consumeBatch(fetcher, batchSize)
 
 		if !wantMore {
 			time.Sleep(queue.pollDuration)
@@ -333,20 +338,21 @@ func (queue *redisQueue) batchSize() int {
 }
 
 // consumeBatch tries to read batchSize deliveries, returns true if any and all were consumed
-func (queue *redisQueue) consumeBatch(batchSize int) bool {
+func (queue *redisQueue) consumeBatch(fetcher Fetcher, batchSize int) bool {
 	if batchSize == 0 {
 		return false
 	}
 
 	for i := 0; i < batchSize; i++ {
-		result := queue.redisClient.RPopLPush(queue.readyKey, queue.unackedKey)
-		if redisErrIsNil(result) {
+		result := fetcher.Fetch(queue.redisClient, queue)
+
+		if result == "" {
 			// debug(fmt.Sprintf("rmq queue consumed last batch %s %d", queue, i)) // COMMENTOUT
 			return false
 		}
 
 		// debug(fmt.Sprintf("consume %d/%d %s %s", i, batchSize, result.Val(), queue)) // COMMENTOUT
-		queue.deliveryChan <- newDelivery(result.Val(), queue.unackedKey, queue.rejectedKey, queue.pushKey, queue.redisClient)
+		queue.deliveryChan <- newDelivery(result, queue.unackedKey, queue.rejectedKey, queue.pushKey, queue.redisClient)
 	}
 
 	// debug(fmt.Sprintf("rmq queue consumed batch %s %d", queue, batchSize)) // COMMENTOUT
