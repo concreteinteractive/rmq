@@ -1,7 +1,7 @@
 package rmq
 
 import (
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
 
 type Fetcher interface {
