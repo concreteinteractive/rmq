@@ -33,6 +33,7 @@ type Queue interface {
 	PublishBytes(payload []byte) bool
 	SetPushQueue(pushQueue Queue)
 	StartConsuming(prefetchLimit int, pollDuration time.Duration) bool
+	StartConsumingWithFetcher(fetcher Fetcher, prefetchLimit int, pollDuration time.Duration) bool
 	StopConsuming() bool
 	AddConsumer(tag string, consumer Consumer) string
 	AddBatchConsumer(tag string, batchSize int, consumer BatchConsumer) string
