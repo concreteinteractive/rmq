@@ -43,6 +43,9 @@ type Queue interface {
 	ReturnRejected(count int) int
 	ReturnAllRejected() int
 	Close() bool
+
+	ReadyCount() int
+	LTrimReadyToLength(toLength int64) (int64, int64)
 }
 
 type redisQueue struct {
@@ -310,6 +313,19 @@ func (queue *redisQueue) RemoveAllConsumers() int {
 		return 0
 	}
 	return int(result.Val())
+}
+
+func (queue *redisQueue) LTrimReadyToLength(toLength int64) (int64, int64) {
+	length := int64(queue.ReadyCount())
+	if length > toLength {
+		dropped := length - toLength
+		result := queue.redisClient.LTrim(queue.readyKey, 0, toLength-1)
+		if redisErrIsNil(result) {
+			return length, 0
+		}
+		return length, dropped
+	}
+	return length, 0
 }
 
 func (queue *redisQueue) consume(fetcher Fetcher) {

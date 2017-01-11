@@ -76,3 +76,11 @@ func (queue *TestQueue) Close() bool {
 func (queue *TestQueue) Reset() {
 	queue.LastDeliveries = []string{}
 }
+
+func (queue *TestQueue) LTrimReadyToLength(toLength int64) (int64, int64) {
+	return 0, 0
+}
+
+func (queue *TestQueue) ReadyCount() int {
+	return 0
+}
