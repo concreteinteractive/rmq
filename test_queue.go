@@ -33,6 +33,10 @@ func (queue *TestQueue) StartConsuming(prefetchLimit int, pollDuration time.Dura
 	return true
 }
 
+func (queue *TestQueue) StartConsumingWithFetcher(fetcher Fetcher, prefetchLimit int, pollDuration time.Duration) bool {
+	return true
+}
+
 func (queue *TestQueue) StopConsuming() bool {
 	return true
 }
