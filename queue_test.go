@@ -202,7 +202,7 @@ func (suite *QueueSuite) TestMulti(c *C) {
 	c.Check(queue.UnackedCount(), Equals, 0)
 
 	queue.StartConsuming(10, time.Millisecond)
-	time.Sleep(2 * time.Millisecond)
+	time.Sleep(5 * time.Millisecond)
 	c.Check(queue.ReadyCount(), Equals, 10)
 	c.Check(queue.UnackedCount(), Equals, 10)
 
@@ -302,7 +302,7 @@ func (suite *QueueSuite) TestReturnRejected(c *C) {
 	c.Check(queue.RejectedCount(), Equals, 0)
 
 	queue.StartConsuming(10, time.Millisecond)
-	time.Sleep(time.Millisecond)
+	time.Sleep(5 * time.Millisecond)
 	c.Check(queue.ReadyCount(), Equals, 0)
 	c.Check(queue.UnackedCount(), Equals, 6)
 	c.Check(queue.RejectedCount(), Equals, 0)
@@ -310,7 +310,7 @@ func (suite *QueueSuite) TestReturnRejected(c *C) {
 	consumer := NewTestConsumer("return-cons")
 	consumer.AutoAck = false
 	queue.AddConsumer("cons", consumer)
-	time.Sleep(time.Millisecond)
+	time.Sleep(5 * time.Millisecond)
 	c.Check(queue.ReadyCount(), Equals, 0)
 	c.Check(queue.UnackedCount(), Equals, 6)
 	c.Check(queue.RejectedCount(), Equals, 0)
