@@ -17,6 +17,7 @@ type Connection interface {
 	OpenQueue(name string) Queue
 	CollectStats(queueList []string) Stats
 	GetOpenQueues() []string
+	StopHeartbeat() bool
 }
 
 // Connection is the entry point. Use a connection to access queues, consumers and deliveries
