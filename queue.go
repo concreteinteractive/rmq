@@ -260,7 +260,16 @@ func (queue *redisQueue) StopConsuming() bool {
 // panics if StartConsuming wasn't called before!
 func (queue *redisQueue) AddConsumer(tag string, consumer Consumer) string {
 	name := queue.addConsumer(tag)
-	go queue.consumerConsume(consumer)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				consumer.OnPanic(fmt.Errorf("Consumer Panic: %s", r))
+			}
+			queue.RemoveConsumer(name)
+			queue.AddConsumer(tag, consumer)
+		}()
+		queue.consumerConsume(consumer)
+	}()
 	return name
 }
 
@@ -271,7 +280,17 @@ func (queue *redisQueue) AddBatchConsumer(tag string, batchSize int, consumer Ba
 
 func (queue *redisQueue) AddBatchConsumerWithTimeout(tag string, batchSize int, timeout time.Duration, consumer BatchConsumer) string {
 	name := queue.addConsumer(tag)
-	go queue.consumerBatchConsume(batchSize, timeout, consumer)
+
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				consumer.OnPanic(fmt.Errorf("Batch Consumer Panic: %s", r))
+			}
+			queue.RemoveConsumer(name)
+			queue.AddBatchConsumerWithTimeout(tag, batchSize, timeout, consumer)
+		}()
+		queue.consumerBatchConsume(batchSize, timeout, consumer)
+	}()
 	return name
 }
 
