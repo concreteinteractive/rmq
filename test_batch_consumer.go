@@ -19,6 +19,10 @@ func (consumer *TestBatchConsumer) Consume(batch Deliveries) {
 	// log.Printf("TestBatchConsumer.Consume() finished")
 }
 
+func (consumer *TestBatchConsumer) OnPanic(err error) {
+
+}
+
 func (consumer *TestBatchConsumer) Finish() {
 	// log.Printf("TestBatchConsumer.Finish()")
 	consumer.LastBatch = nil

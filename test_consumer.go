@@ -29,6 +29,10 @@ func (consumer *TestConsumer) String() string {
 	return consumer.name
 }
 
+func (consumer *TestConsumer) OnPanic(err error) {
+
+}
+
 func (consumer *TestConsumer) Consume(delivery Delivery) {
 	consumer.LastDelivery = delivery
 	consumer.LastDeliveries = append(consumer.LastDeliveries, delivery)
