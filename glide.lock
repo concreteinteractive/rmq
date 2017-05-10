@@ -1,0 +1,16 @@
+hash: ea712fd55f4b9bf823b8d8547130f23d1dc911f2b001966b478b608a599bf4c0
+updated: 2017-05-10T14:12:09.739049037+03:00
+imports:
+- name: github.com/adjust/uniuri
+  version: 498743145e60c272b71d377c4e456335e4ef7524
+- name: github.com/go-redis/redis
+  version: 84163af3c14a312750f6182c2b2dd6ee37699b53
+  subpackages:
+  - internal
+  - internal/consistenthash
+  - internal/hashtag
+  - internal/pool
+  - internal/proto
+testImports:
+- name: github.com/adjust/gocheck
+  version: fbc315b36e0e7dc95023e96b43af5d8de58bc6fb

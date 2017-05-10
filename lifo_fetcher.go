@@ -1,7 +1,7 @@
 package rmq
 
 import (
-	"gopkg.in/redis.v5"
+	"github.com/go-redis/redis"
 )
 
 type LifoFetcher struct {

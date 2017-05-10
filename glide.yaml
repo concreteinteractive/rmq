@@ -1,0 +1,8 @@
+package: github.com/concreteinteractive/rmq
+excludeDirs:
+- example
+import:
+- package: github.com/adjust/uniuri
+- package: github.com/go-redis/redis
+testImport:
+- package: github.com/adjust/gocheck
